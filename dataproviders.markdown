@@ -26,7 +26,7 @@ because it touches on a lot of really elementary basics of programming.
 
 ## Look at all those tests
 If you didn't know about data providers, what might your tests look like?
- 
+
 {: lang="php" }
     <?php
     class FizzBuzzTest extends PHPUnit_Framework_Testcase
@@ -76,7 +76,6 @@ I'm sure you can see the pattern:
 * same assertion being used over and over
 
 ## Creating data providers
-
 A data provider is another method inside your test class that returns an
 array of results, with each result set being an array itself. Through
 some magic internal work, PHPUnit converts the returned result set into parameters
@@ -121,7 +120,6 @@ skill of applying some critical analysis to the testing code we are writing
 to make sure we are only writing the tests that we actually need.
 
 ## More complex examples
-
 Don't feel like you can only have really simple data providers. All you need
 to do is return an array of arrays, with each result set matching the
 parameters that your testing method is expecting. Here's a more complex example:
@@ -133,7 +131,7 @@ parameters that your testing method is expecting. Here's a more complex example:
         // Read in some data from a CSV file
         $fp = fopen("./fixtures/data.csv");
         $response = array();
-        
+
         while ($data = fgetcsv($fp, 1000, ",")) {
             $response[] = array($data[0], $data[1], $data[2]);
         }

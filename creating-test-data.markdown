@@ -80,8 +80,7 @@ When you're ready to use it in your test:
         "Did not get expected count of black widgets"
     );
 
-## Fake It When You Need To 
-
+## Fake It When You Need To
 Remember I pointed out earlier in the chapter that it's good
 to have realistic testing data? When you write tests, it's very
 tempting to take short cuts. For instance, I have been

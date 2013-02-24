@@ -37,7 +37,7 @@ Here's an example that will install PHPUnit globally in the specified 'config' d
         "config": {
             "bin-dir": "/usr/local/bin/"
         }
-    }   
+    }
 
 Composer will also try to pull in any required dependencies, but if for
 some reason they don't work, you can just add them to composer.json.
@@ -53,7 +53,7 @@ you can create a much simplified version of that JSON file
     }
 
 This will result in PHPUnit being available *inside* your project, in the
-vendor directory. 
+vendor directory.
 
 It's a tough call. On the one hand, you don't want to force people to
 install PHPUnit just to use your project. On the other hand, it does ensure
@@ -67,9 +67,9 @@ can be as simple as:
 
 {: lang }
     path/to/pear config-set auto_discover 1
-    path/to/pear install pear.phpunit.de/PHPUnit 
+    path/to/pear install pear.phpunit.de/PHPUnit
 
-By default PEAR will try to pull in additional dependencies for PHPUnit, 
+By default PEAR will try to pull in additional dependencies for PHPUnit,
 but you can manually install any additional missing components via PEAR as well.
 
 ### Which One Should I Use
@@ -82,7 +82,7 @@ does global installs.
 In any case, consult the documentation for PHPUnit to see all the dependencies
 and add-ons that are available.
 
-## Minimum Viable Test Class 
+## Minimum Viable Test Class
 {lang : php }
     <?php
     class GrumpyTest extends PHPUnit_Framework_TestCase
@@ -108,9 +108,9 @@ All the built in assertions that PHPUnit provides follow the same pattern:
 * an optional message to be displayed when the test fails
 
 I can already tell that you are thinking "he's lying about the pattern because
-it says 'assertTrue'. In a way you are right. PHPUnit does provide some
-shortcuts to perform certain assertions. assertTrue() is one of them, along
-with it's counterpart assertFalse(). These shortcuts do not change the fact
+it says '*assertTrue()*'." In a way you are right. PHPUnit does provide some
+shortcuts to perform certain assertions. *assertTrue()* is one of them, along
+with it's counterpart *assertFalse()*. These shortcuts do not change the fact
 that they all follow the same pattern.
 
 For more details on all the assertions that are available to you, check
@@ -142,16 +142,43 @@ go into overdraft unless allowed". But be careful: if you have tests that have
 the same name but you append an integer to the end, TestDox does not know
 that the two are different.
 
+Here's a sample run using it.
+
+{: lang="text"}
+    $ phpunit --testdox
+    PHPUnit 3.7.10 by Sebastian Bergmann.
+
+    Configuration read from /Users/chartjes/Sites/liesitoldmykids/tests/phpunit.xml
+
+    LieEntity
+     [x] Description is not spammy
+     [x] Description has swearing
+     [x] Description has porn
+
+    LieMapper
+     [x] Returns lie collection
+     [x] Get one record
+     [x] Get correctly handles not finding lie
+     [x] Get valid lies
+     [x] Create new lie
+     [x] Delete known created entity
+     [x] Delete correctly handles null lie entity id
+     [x] Delete handles no deleted rows correctly
+     [x] Delete handles missing entity correctly
+     [x] Update known entity
+     [x] Update correctly handles bad lie entity
+     [x] Update correctly handles rejecting wrong lie update
+
 My advice: stick to using the optional message argument, but TestDox is a
 great option if your tests haven't been following my advice. At least you
 will know what test in particular is reporting failures.
 
 ## Configuring Run Time Options
-If you run 'phpunit --help' from the command line, you will see a
+If you run '*phpunit --help*' from the command line, you will see a
 ridiculous number of options that are available to you. Some of them are
 useful, others seem to be in there because the author was looking for
 compatibility with existing tools. Here are the ones that I have found most
-useful:
+useful.
 
 ### Logging Options
 If you are using PHPUnit in conjunction with a continuous integration
@@ -297,7 +324,7 @@ an example.
         public function run(PHPUnit_Framework_TestResult $result = NULL)
         {
             $this->setPreserveGlobalState(true);
-            
+
             return parent::run($result);
         }
     }
@@ -314,7 +341,7 @@ configuration file doesn't include any tests that require isolation
 to work correctly.
 
 My experience has been that the dual configuration file method
-is the best way to go. 
+is the best way to go.
 
 ## Organizing Your Tests
 
@@ -330,13 +357,13 @@ find tests to run.
     |   | -- Fizz
     |   |    `-- InputsTest.php
     |   | -- Buzz
-    |   |    `-- RecursionTest.php 
+    |   |    `-- RecursionTest.php
     |   `-- BazzTest.php
-    `-- FooTest.php    
+    `-- FooTest.php
 
 This is normally the way I organize my tests.
 
-### XML Configuration 
+### XML Configuration
 In a previous section I talked about creating an XML test suite file. You
 can also specify exactly what tests you want run via XML. Let's create
 a file that mirrors the structure we used above.
@@ -388,7 +415,52 @@ So how do we do this? First, you'd define your test suites:
     </phpunit>
 
 Let's say you want to only run the "staging" test suite. You would tell
-PHPUnit via the CLI runner to do that like this: 
+PHPUnit via the CLI runner to do that like this:
 
 { lang: text}
     /path/to/phpunit --testsuite staging
+
+### Alternate Test Runners
+By default, PHPUnit's test runner is pretty bland. It doesn't
+even do red for failures or green for passes! Being up on Internet
+memes, I like to use a [Nyan Cat](http://www.nyan.cat/) test runner
+to display my results.
+
+To enable it, I installed the [test runner](https://github.com/whatthejeff/nyancat-phpunit-resultprinter/)
+using Composer and then altered my PHPUnit configuration file
+to use it.
+
+{: lang="xml"}
+    <?xml version="1.0" encoding="UTF-8"?>
+    <phpunit
+        bootstrap="vendor/autoload.php"
+        printerFile="vendor/whatthejeff/nyancat-phpunit-resultprinter/src/NyanCat/PHPUnit/ResultPrinter.php"
+        printerClass="NyanCat\PHPunit\ResultPrinter">
+        <testsuites>
+            <testsuite name="Lies I Told My Kids">
+                <file>LieEntityTest.php</file>
+                <file>LieMapperTest.php</file>
+                <file>UserMapperTest.php</file>
+                <exclude>./vendor</exclude>
+                <exclude>./report</exclude>
+            </testsuite>
+        </testsuites>
+    </phpunit>
+
+Behold, the Nyan Cat!
+
+{: lang="text"}
+    $ phpunit 
+    PHPUnit 3.7.10 by Sebastian Bergmann.
+
+    Configuration read from /Users/chartjes/Sites/liesitoldmykids/tests/phpunit.xml
+
+     26  -_-_-_-_-_-_-_-_-_-_-_-_-_-_,------,
+     0   -_-_-_-_-_-_-_-_-_-_-_-_-_-_|   /\_/\
+     0   -_-_-_-_-_-_-_-_-_-_-_-_-_-^|__( ^ .^)
+         -_-_-_-_-_-_-_-_-_-_-_-_-_-  ""  ""
+
+
+    Time: 1 second, Memory: 4.50Mb
+
+    OK (26 tests, 79 assertions)

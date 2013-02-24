@@ -5,27 +5,27 @@
 
     class Roster
     {
-        protected $_db;
+        protected $db;
 
         public function __construct($db)
         {
-            $this->_db = $db;
+            $this->db = $db;
         }
 
         public function getByTeamNickname($nickname)
         {
             $sql = "
-                SELECT tig_name 
+                SELECT tig_name
                 FROM rosters
                 WHERE ibl_team = ?";
-            $sth = $this->_db->prepare($sql);
+            $sth = $this->db->prepare($sql);
             $sth->execute(array($nickname));
             $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
-            
+
             if (!$rows) {
                 return array();
             }
-            
+
             $rosterContents = array();
 
             foreach ($rows as $row) {
@@ -34,7 +34,7 @@
 
             return $rosterContents;
         }
-    }  
+    }
 
 ## Functional Tests vs. Unit Tests
 Most web applications are thin wrappers around a database, despite our
@@ -46,18 +46,18 @@ tests. If you want to be strict about how you are defining your tests, then
 if you are writing unit tests, you should never be speaking to the database.
 
 Why? Unit test suites are meant to be testing code, not the ability of
-a database server to return results. They also need to run quickly. If your 
+a database server to return results. They also need to run quickly. If your
 test suite takes a long time to run, nobody is going to bother running it. Who
 wants to wait 30 minutes for your entire test suite to run? I sure don't.
- 
+
 If you are testing code that does complex database queries, guess what?
 Your test will be waiting every single time you run it for that query to
 finish. Again, all those little delays in the execution time for your test
 suite add up to people becoming more and more reluctant to run the entire
-test suite. This leads to bugs crossing "units" being discovered only when 
+test suite. This leads to bugs crossing "units" being discovered only when
 someone runs the whole test suite. That's not good enough. We can do better.
 
-I advocate writing as few tests as possible that speak directly to the 
+I advocate writing as few tests as possible that speak directly to the
 database. If you have some business logic for your application that exists
 only in an SQL query, then you probably will have to write a few tests
 that speak to the database directly.
@@ -88,17 +88,17 @@ A sample test that talks directly to the database:
     <?php
     class RosterDBTest extends PHPUnit_Framework_TestCase
     {
-        protected $_db;
+        protected $db;
 
         public function setUp()
         {
-            $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats_test;user=stats;password=st@ts=Fun";
-            $this->_db = new PDO($dsn);
+            $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats_test;user=stats;password=********";
+            $this->db = new PDO($dsn);
         }
 
         public function testReturnsRosterSummaryForKnownRoster()
         {
-            $roster = new \Grumpy\Roster($this->_db);
+            $roster = new \Grumpy\Roster($this->db);
             $expectedRoster = array('AAA Foo', 'BBB Bar', 'ZZZ Zazz');
             $testRoster = $roster->getByTeamNickname('TEST');
             $this->assertEquals(
@@ -110,7 +110,7 @@ A sample test that talks directly to the database:
     }
 
 The downside to writing tests that speak directly to a database is that you
-end up needing to constantly maintain a testing database. If you have a 
+end up needing to constantly maintain a testing database. If you have a
 testing environment where multiple developers share the same database, you
 run a real risk of over-writing test data or even ending up with data sets
 that bear no resemblance to data that actually exists in production.
@@ -148,8 +148,6 @@ Using our sample app, here's one way to do it.
     <?php
     class RosterDBTest extends PHPUnit_Extensions_Database_Testcase
     {
-        protected $_db;
-
         public function getConnection()
         {
             $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=st@ts=Fun";
@@ -266,7 +264,7 @@ then replace it with the desired null value.
 
 Let's say your have a dataset like this:
 
-{: lang="xml" }
+{: lang="xml"}
    <?xml version="1.0" ?>
     <dataset>
             <rosters id="1" tig_name="FOO Bat" ibl_team="MAD" comments="Test record" status="0" item_type="2" />
@@ -274,16 +272,19 @@ Let's say your have a dataset like this:
             <rosters id="3" tig_name="MAD#1" ibl_team="MAD" status="0" comments="###NULL###" item_type="0" />
             <rosters id="4" tig_name="TOR Hartjes" ibl_team="MAD" comments="Test writer" status="1" item_type="1" />
     </dataset> 
-  
+
+Once you've loaded the data set, you then need to iterate through it and
+swap out your token representing *null* for the real thing.
+ 
 {: lang="php" }
     <?php
     public function getDataSet()
     {
-        $ds = $this->createFlatXmlDataSet(dirname(__FILE__) 
+        $ds = $this->createFlatXmlDataSet(dirname(__FILE__)
                 . '/fixtures/roster-seed.xml');
         $rds = new PHPUnit_Extensions_Database_DataSet_ReplacementDataSet($ds);
         $rds->addFullReplacement('###NULL###', null);
-        
+
         return $rds;
     }
 
@@ -304,26 +305,26 @@ Don't like XML? You can always do up a data set in YAML:
         status: 0
         item_type: 2
       -
-        id: 2 
+        id: 2
         tig_name: "TOR Bautista"
         ibl_team: "MAD"
         comments: "Joey bats!"
-        status: 1 
-        item_type: 1 
+        status: 1
+        item_type: 1
       -
-        id: 3 
+        id: 3
         tig_name: "MAD#1"
         ibl_team: "MAD"
-        comments: 
+        comments:
         status: 0
-        item_type: 0 
+        item_type: 0
       -
-        id: 4 
+        id: 4
         tig_name: "TOR Hartjes"
         ibl_team: "MAD"
         comments: "Test Writer"
-        status: 1 
-        item_type: 1 
+        status: 1
+        item_type: 1
 
 Then, to load that data set:
 
@@ -379,9 +380,6 @@ any other file format:
 
 The only catch is that we have to implement our own dataset code...
 
-@TODO -- fix this as it does not work this way in the latest version of
-PHPUnit
-
 {: lang="php" }
     <?php
     require_once 'PHPUnit/Util/Filter.php';
@@ -393,16 +391,16 @@ PHPUnit
 
     PHPUnit_Util_Filter::addFileToFilter(__FILE__, 'PHPUNIT');
 
-    class Grumpy_DbUnit_ArrayDataSet 
+    class Grumpy_DbUnit_ArrayDataSet
         extends PHPUnit_Extensions_Database_DataSet_AbstractDataSet
     {
         protected $tables = array();
 
         public function __construct(array $data)
         {
-            foreach ($data AS $tableName => $rows) {
+            foreach ($data as $tableName => $rows) {
                 $columns = array();
-        
+
                 if (isset($rows[0])) {
                     $columns = array_keys($rows[0]);
                 }
@@ -413,7 +411,7 @@ PHPUnit
                 foreach ($rows AS $row) {
                     $table->addRow($row);
                 }
-               
+
                 $this->tables[$tableName] = $table;
             }
         }
@@ -435,7 +433,7 @@ PHPUnit
 
 In my mind, the only advantage to going through the hassle of creating your
 own dataset object is that you end up with a dataset that handles missing
-values a lot easier. 
+values a lot easier.
 
 ## Our first DBUnit test
 How would we write a test for a method that removes a player from a roster?
@@ -446,7 +444,7 @@ Inside Roster we could add this method:
     public function deleteItem($itemId)
     {
         $sql = "DELETE FROM teams WHERE id = ?";
-        $sth = $this->_db->prepare($sql);
+        $sth = $this->db->prepare($sql);
         return $sth->execute(array($itemId));
     }
 
@@ -457,7 +455,7 @@ table.
     <?php
     public function testRemoveBatterFromRoster()
     {
-        $testRoster = new Roster($this->_db);
+        $testRoster = new Roster($this->db);
         $expectedCount = 3;
 
         // Database fixture has 4 records in it
@@ -491,7 +489,7 @@ First, create an example of what the database would give us back.
 
 {: lang="php" }
     <?php
-    $statement = $this->getMockBuilder('StdObject')
+    $statement = $this->getMockBuilder('stdClass')
         ->setMethods(array('execute', 'fetchAll'))
         ->getMock();
     $statement->expects($this->once())
@@ -502,30 +500,28 @@ First, create an example of what the database would give us back.
         ->will($this->returnValue($databaseResultSet));
 
 Next, create a mock object to represent the object that PDO would give us
-back when we run the prepare() method.
+back when we run the *prepare()* method.
 
-My use of StdObject is okay here for the purposes of this particular
+My use of stdClass is okay here for the purposes of this particular
 test. It doesn't really matter what type of object the mocked statement is
 because we are more interested in what is returned via those two methods.
 I've used this trick a few times when dealing with mocked objects that
-need to return other objects. 
+need to return other objects.
+
+You can create a MockPDO object by extending a PDO object and
+over-riding the constructor. I find it unnecessary for testing purposes.
 
 {: lang="php" }
     <?php
-    $db = $this->getMockBuilder('PDO')
-        ->disableOriginalConstructor()
+    $db = $this->getMockBuilder('stdClass')
         ->setMethods(array('prepare'))
         ->getMock();
     $db->expects($this->once())
         ->method('prepare')
         ->will($this->returnValue($statement));
-       
-Finally, create a mocked PDO object and tell it to return our mocked
-statement object. Note the use of disableOriginalContructor(). This is needed
-because in this particular test I only care about returning the value from
-the prepare() method. By not executing the constructor, we don't have to
-worry at all about passing in a correctly-formatted DSN like PDO would
-normally expect.
+
+Finally, create another mocked object and tell it to return our mocked
+statement object.
 
 {: lang="php" } 
     <?php
@@ -568,7 +564,7 @@ What should the test look like?
     {
         // Assuming we are using the fixtures from before
         $expectedRosterCount = 4;
-        $roster = new \Grumpy\Roster($this->_db);
+        $roster = new \Grumpy\Roster($this->db);
         $count = $roster->countItemsByTeamNickname('TEST');
 
         $this->assertEquals(
@@ -596,16 +592,16 @@ Now to add a method to our Roster class that uses SQL to give us the answer:
             FROM rosters
             WHERE ibl_team = ?
         ";
-        $stmt = $this->_db->prepare($sql);
+        $stmt = $this->db->prepare($sql);
         $stmt->execute(array($nickname));
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $result['roster_count'];
     }
-    
+
 What would be the point of mocking this? It really is what I refer to as
 a "passthru" function: it's just returning the response of a single action
-without doing any manipulation to it. 
+without doing any manipulation to it.
 
 This is not worth doing:
 
@@ -619,7 +615,7 @@ This is not worth doing:
         $expectedRosterCount = 4;
         $databaseResultSet = array('roster_count' => $expectedRosterCount);
 
-        $statement = $this->getMockBuilder('StdObject')
+        $statement = $this->getMockBuilder('stdClass')
             ->setMethods(array('execute', 'fetchAll'))
             ->getMock();
         $statement->expects($this->once())
@@ -628,16 +624,16 @@ This is not worth doing:
         $statement->expects($this->once())
             ->method('fetchAll')
             ->will($this->returnValue($databaseResultSet));
-        
-        $db = $this->getMockBuilder('PDO')
+
+        $db = $this->getMockBuilder('stdClass')
             ->disableOriginalConstructor()
             ->setMethods(array('prepare'))
             ->getMock();
         $db->expects($this->once())
             ->method('prepare')
             ->will($this->returnValue($statement));
-        
-        $roster = new \Grumpy\Roster($db); 
+
+        $roster = new \Grumpy\Roster($db);
         $count = $roster->countItemsByTeamNickname('TEST');
 
         $this->assertEquals(
@@ -645,7 +641,7 @@ This is not worth doing:
             $count,
             'countItemsByTeamNickname() did not return expected roster count'
         );
-    }     
+    }
 
 Having tests are good. Having tests for the sake of writing tests just to use
 a specific testing tool is useless.

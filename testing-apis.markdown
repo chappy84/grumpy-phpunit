@@ -5,17 +5,17 @@
 
     class GimmebarApi
     {
-        protected $_apiUrl;
+        protected $apiUrl;
 
         public function __construct($apiUrl)
         {
-            $this->_apiUrl = $apiUrl;
+            $this->apiUrl = $apiUrl;
         }
 
         public function getPublicAssetCountByUser($username)
         {
             $response = $this->grabPublicAssetsByUser($username);
-          
+
             if (isset($response['total_records'])) {
                 return $response['total_records'];
             }
@@ -26,14 +26,12 @@
         public function grabPublicAssetsByUser($username)
         {
             $response = file_get_contents(
-                $this->_apiUrl . "/public/assets/{$username}"
+                $this->apiUrl . "/public/assets/{$username}"
             );
 
             return json_decode($response, true);
         }
     }
-
-[TechEdit - Still use _ for protected member names or take it out?]
 
 If there is one question I get over and over again from people seeking
 testing advice, it's "how can I test API calls". The only question
@@ -96,19 +94,19 @@ First, let's refactor our API object:
 
     class GimmebarApi
     {
-        protected $_apiUrl;
+        protected $apiUrl;
 
         public function __construct($apiUrl)
         {
-            $this->_apiUrl = $apiUrl;
+            $this->apiUrl = $apiUrl;
         }
 
         public function grabPublicAssetsByUser($username)
         {
             $response = file_get_contents(
-                $this->_apiUrl . "/public/assets/{$username}"
+                $this->apiUrl . "/public/assets/{$username}"
             );
-            
+ 
             return json_decode($response, true);
         }
     }
@@ -188,10 +186,10 @@ we expect.
              }],
            "total_records": 1,
            "limit": 10,
-           "skip": 0 
+           "skip": 0
         }
 EOT;
-        
+
         $api = $this->getMockBuilder('\Grumpy\GimmebarApi')
             ->setMethods(array('grabPublicAssetsByUser'))
             ->getMock();
@@ -202,7 +200,7 @@ EOT;
         $apiWrapper = new \Grumpy\GimmebarWrapper($api);
         $testResponse = $apiWrapper->grabPublicAssetsByUser('chartjes');
         $this->assertTrue(is_array($testResponse));
-    } 
+    }
 
 In this test case we are making sure that the Gimmebar wrapper is correctly
 handling a typical response we'd get from Gimmebar itself. Here's another
@@ -224,15 +222,15 @@ example of a test using a mock object:
         $apiWrapper = new \Grumpy\GimmebarWrapper($api);
         $expectedCount = 10;
         $testCount = $apiWrapper->getPublicAssetCountByUser('test');
-        
+
         $this->assertEquals(
             $expectedCount,
             $testCount,
             "Did not correctly count the number of public assets"
         );
- 
+
 Just like any other test, we're still following the same logic: we create
-a scenario, mock out resources that are required for that scenario, and 
+a scenario, mock out resources that are required for that scenario, and
 then test our code to make sure that, based on a known set of inputs, we
 are getting an expected output.
 

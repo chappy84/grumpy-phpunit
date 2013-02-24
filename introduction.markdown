@@ -1,6 +1,6 @@
 # Introduction
-When I wrote my book "The Grumpy Programmer's Guide To Building Testable PHP
-Applications", my goal was to teach people how to write code that
+When I wrote my book "The Grumpy Programmer's Guide To Building Testable Applications In PHP" 
+my goal was to teach people how to write code that
 you could easily test. My reasoning was that there was lots of information
 available on how to use testing tools.
 
