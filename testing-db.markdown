@@ -71,9 +71,9 @@ front controller of your framework-based code base.
 If you are going to write tests that connect to a database, then make sure
 you create a sandbox that the database will live in. When I say
 sandbox, I am referring to creating an environment where you can delete
-and recreate the database easily. Even better if you can automate doing it.
+and recreate the database easily; automating these tasks is even better.
 
-So make sure that your application supports the ability to decide what
+Make sure that your application supports the ability to decide what
 database it will talk to. Set it in the bootstrap, or in your globally-available
 configuration object, or in the constructor of the God object every other object
 in your application extends itself from. I don't care, just make sure
@@ -112,7 +112,7 @@ A sample test that talks directly to the database:
 The downside to writing tests that speak directly to a database is that you
 end up needing to constantly maintain a testing database. If you have a 
 testing environment where multiple developers share the same database, you
-run a real risk of over-writing test data or even ending up with data sets
+run a real risk of over-writing test data or even ending up with datasets
 that bear no resemblance to data that actually exists in production.
 
 Like with any kind of testing, you are looking to compare expected results
@@ -121,12 +121,12 @@ really achieve this is to either have your testing process dump the existing
 database and recreate it from scratch, or use database fixtures.
 
 In the PHPUnit world, I feel there is only one database-fixture-handling tool
-worth considering.
+worth considering: DBUnit.
  
 ## DBUnit
 As I've said before, I am not a big fan of using database fixtures, instead
 preferring to write my code in such a way that I instead create objects
-to represent the data. Easier to mock, easier to test. But you are not me.
+to represent the data: Easier to mock, easier to test. But you are not me.
 If you want to use a database in your tests, I recommend the
 use of [DBUnit](https://github.com/sebastianbergmann/dbunit).
 
@@ -260,11 +260,11 @@ Loading that dataset is very similar:
             dirname(__FILE__) . '/fixtures/roster-seed.xml');
     }
 
-One of the drawbacks to using an XML dataset is that if you do have null
-values in your data, you have to put a placeholder in your dataset and
-then replace it with the desired null value.
+One of the drawbacks to using an XML dataset is that if you have null
+values in your data, you have to put placeholders in your dataset and
+then replace them with a null value.
 
-Let's say your have a dataset like this:
+As an example, the following dataset specifies null values as "###NULL###":
 
 {: lang="xml" }
    <?xml version="1.0" ?>
@@ -274,6 +274,10 @@ Let's say your have a dataset like this:
             <rosters id="3" tig_name="MAD#1" ibl_team="MAD" status="0" comments="###NULL###" item_type="0" />
             <rosters id="4" tig_name="TOR Hartjes" ibl_team="MAD" comments="Test writer" status="1" item_type="1" />
     </dataset> 
+
+In our test case's getDataSet() method, we use
+`PHPUnit_Extensions_Database_DataSet_ReplacementDataSet` to make substitutions.
+The following example replaces "###NULL###" with a `null` value.
   
 {: lang="php" }
     <?php
@@ -292,7 +296,7 @@ to the point where I would just be cut-and-pasting the section of the
 PHPUnit manual into the book. Not really what I had in mind.
 
 ### Using YAML datasets
-Don't like XML? You can always do up a data set in YAML:
+Don't like XML? You can always provide datasets in YAML:
 
 {: lang="yaml" }
     rosters:
@@ -325,7 +329,7 @@ Don't like XML? You can always do up a data set in YAML:
         status: 1 
         item_type: 1 
 
-Then, to load that data set:
+Then, to load that dataset:
 
 {: lang="php" }
     <?php
@@ -336,7 +340,7 @@ Then, to load that data set:
     }
 
 ### Using CSV datasets
-Sure, it's possible:
+CSV (comma-separated value) datasets are also possible:
 
 {: lang="csv" }
     id;tig_name;ibl_team;comments;status;item_type
@@ -473,7 +477,7 @@ table.
 
 ## Mocking Database Connections
 So we have tests that are talking to the database directly and I have shown
-you how to use fixtures to create known data sets. It's time to move up
+you how to use fixtures to create known datasets. It's time to move up
 to the pure unit test level and make use of mock objects so that we don't
 have to actually talk to the database any more.
 
