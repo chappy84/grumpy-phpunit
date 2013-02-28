@@ -265,13 +265,13 @@ then replace it with the desired null value.
 Let's say your have a dataset like this:
 
 {: lang="xml"}
-   <?xml version="1.0" ?>
+    <?xml version="1.0" ?>
     <dataset>
-            <rosters id="1" tig_name="FOO Bat" ibl_team="MAD" comments="Test record" status="0" item_type="2" />
-            <rosters id="2" tig_name="TOR Bautista" ibl_team="MAD" comments="Joey bats!" status="1" item_type="1" />
-            <rosters id="3" tig_name="MAD#1" ibl_team="MAD" status="0" comments="###NULL###" item_type="0" />
-            <rosters id="4" tig_name="TOR Hartjes" ibl_team="MAD" comments="Test writer" status="1" item_type="1" />
-    </dataset> 
+        <rosters id="1" tig_name="FOO Bat" ibl_team="MAD" comments="Test record" status="0" item_type="2" />
+        <rosters id="2" tig_name="TOR Bautista" ibl_team="MAD" comments="Joey bats!" status="1" item_type="1" />
+        <rosters id="3" tig_name="MAD#1" ibl_team="MAD" status="0" comments="###NULL###" item_type="0" />
+        <rosters id="4" tig_name="TOR Hartjes" ibl_team="MAD" comments="Test writer" status="1" item_type="1" />
+    </dataset>
 
 Once you've loaded the data set, you then need to iterate through it and
 swap out your token representing *null* for the real thing.
