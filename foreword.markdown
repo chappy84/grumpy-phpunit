@@ -1,4 +1,4 @@
-# Foreward 
+# Foreword 
 {frontmatter}
 _Justin Searls is what I like to call a "testing brother from another mother".
 He works with the awesome folks at [Test Double](http://testdouble.com) providing

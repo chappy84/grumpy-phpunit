@@ -11,7 +11,15 @@ to thank the following people:
 * Tanya Lam (http://www.tanyalam.com/) for the awesome cover art
 
 Finally, none of this would be possible without the incredibly high
+<<<<<<< HEAD
 tolerance levels of my wife, Claire. She handles my frequent absences (both
 real and virtual) with grace and humour.
+=======
+tolerance level of my wife, Claire.  Owner of the best Twitter handle
+ever in @internet\_widow, she has learned over the years when it
+is best to just nod and smile when I start going on and on about
+something I am passionate about.
+
+>>>>>>> cde1fdeb20a20bf821fc16b98c42353b9504b5fb
 
 

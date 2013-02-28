@@ -34,8 +34,8 @@
     }
 
 If there is one question I get over and over again from people seeking
-testing advice, it's "how can I test API calls". The only question
-that I get asked more is "why are you so grumpy all the time?".
+testing advice, it's "how can I test API calls?" The only question
+that I get asked more is "why are you so grumpy all the time?"
 
 Testing API calls is really no different than testing any other
 kind of code: you have an expected output, you execute some code

@@ -2,7 +2,7 @@
 
 # PHPUnit For Grumpy Developers
 PHPUnit can look intimidating, even to just get the skeleton of a test created, due
-to the immense length of it's documentation and large number of configurable
+to the immense length of its documentation and large number of configurable
 options. Don't be scared though, I am here to help!
 
 You can start with just a few of the basics before moving on to more complicated setups that include options for
@@ -76,8 +76,8 @@ but you can manually install any additional missing components via PEAR as well.
 That depends on what additional dependencies you happen to be including. I definitely
 think you should choose one method and stick with it, however, as mixing Composer and PEAR
 might cause you to make mistakes and forget a package that you are likely
-to need. Its worth noting that Composer installs dependencies locally by default while PEAR
-does global installs.
+to need. It's worth noting that Composer installs dependencies locally by default while PEAR
+installs globally by default.
 
 In any case, consult the documentation for PHPUnit to see all the dependencies
 and add-ons that are available.
@@ -100,7 +100,7 @@ this one, and then all their test cases extend from it. Sounds like we are
 getting to [Inception](http://en.wikipedia.org/wiki/Inception) levels of
 class construction. 
 
-All the built in assertions that PHPUnit provides follow the same pattern:
+All the built-in assertions that PHPUnit provides follow the same pattern:
 
 * a type of assertion
 * an expected value
@@ -108,9 +108,9 @@ All the built in assertions that PHPUnit provides follow the same pattern:
 * an optional message to be displayed when the test fails
 
 I can already tell that you are thinking "he's lying about the pattern because
-it says '*assertTrue()*'." In a way you are right. PHPUnit does provide some
-shortcuts to perform certain assertions. *assertTrue()* is one of them, along
-with it's counterpart *assertFalse()*. These shortcuts do not change the fact
+it says 'assertTrue.'" In a way, you are right. PHPUnit does provide some
+shortcuts to perform certain assertions. assertTrue() is one of them, along
+with its counterpart assertFalse(). These shortcuts do not change the fact
 that they all follow the same pattern.
 
 For more details on all the assertions that are available to you, check
@@ -137,7 +137,7 @@ argument. You could use PHPUnit's [TestDox](http://www.phpunit.de/manual/3.7/en/
 functionality. What it does is turn the name of your test methods into easily-read
 strings. 
 
-It could turn testBankBalanceCannotGoIntoOverdraftUnlessAllowed into "Bank balance cannot
+It will turn the test method name "testBankBalanceCannotGoIntoOverdraftUnlessAllowed" into "Bank balance cannot
 go into overdraft unless allowed". But be careful: if you have tests that have
 the same name but you append an integer to the end, TestDox does not know
 that the two are different.
@@ -203,13 +203,14 @@ In order to generate a code coverage report, you need to have
 [the PHP CodeCoverage component](http://github.com/sebastianbergmann/php-code-coverage)
 and [XDebug](http://xdebug.org) installed. 
 
-There are two you need to consider:
+There are two additional options you need to consider when generating code
+coverage:
 
 Use *--coverage-clover optional/path/to/file* for generating Clover-formatted
 reports that can be read by Jenkins code coverage plugins.
 
 Clover-formatted reports can be used to examine trends over time in terms of
-code coverage and lines of code added. Extremely useful if you are trying to
+code coverage and lines of code added. These are extremely useful if you are trying to
 make sure developers are living up to their promises of writing tests with
 maximum code coverage.
 
@@ -218,7 +219,7 @@ can view in your browser to see code coverage results.
 
 ### Managing Global State 
 Many PHP applications make use of singletons that have static method calls,
-or rely on globals and super-globals (like $_SESSION or $_POST, etc). While there
+or rely on globals and super-globals (such as $_SESSION or $_POST, etc). While there
 are legitimate reasons from an architectural standpoint to use static
 methods, they are kryptonite when it comes to testing. Static classes, 
 attributes, and variables are also considered part of the global state.
@@ -237,7 +238,7 @@ mechanism will increase memory usage and test execution time, and statics
 are all about trying to impose immutability in a language that likes everything
 to be dynamic.
 
-So, if you do need to use them, here are some tips:
+However, if you do need to use them, here are some tips:
 
 * *--no-globals-backup* will disable the default backup-and-restore $GLOBALS
 * *--static-backup* will backup and restore static attributes by default
@@ -386,14 +387,18 @@ allows you the flexibility to prevent tests being run that might depend on code
 fixes which have not yet been distributed to the rest of the team.
 
 ### Multiple Test Suites
-One of the things that you will find if you start writing a large number
-of tests for your application: some of those tests might be flaky due to
-integration with 3rd party services you have not put wrappers around or
-shared testing database servers that can get overloaded. These things,
-while regrettable, are sometimes a reality for a resource-starved
+As you start writing a large number of tests for your application, you'll
+observe some common problems: 
+
+- some of your tests might be flaky due to integration with 3rd party services
+  you have not put wrappers around.
+- shared testing database servers can often get overloaded, leading to transient
+  test failures.
+  
+These things, while regrettable, are sometimes a reality for a resource-starved
 development team.
 
-Through the use of test suites you can create test plans
+Through the use of test suites, you can create test plans
 that you can choose to execute on an as-needed basis. To use the above
 analogy, you might only want to run the flaky tests during the final set
 of tests before a production push.
