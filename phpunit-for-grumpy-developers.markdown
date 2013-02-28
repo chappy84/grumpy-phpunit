@@ -52,8 +52,10 @@ you can create a much simplified version of that JSON file
         }
     }
 
-This will result in PHPUnit being available *inside* your project, in the
-vendor directory.
+Then, if people choose to install or update your code via Composer and use the
+`--dev` flag, they will get the version of PHPUnit you have specified
+installed and available for use *inside* your project, in the vendor
+directory.
 
 It's a tough call. On the one hand, you don't want to force people to
 install PHPUnit just to use your project. On the other hand, it does ensure
@@ -94,11 +96,9 @@ and add-ons that are available.
     }
 
 That is what I would call a Minimum Viable Test class. All test classes
-need to extend off of the base PHPUnit_Framework_TestCase class, although
+need to extend off of the base `PHPUnit_Framework_TestCase` class, although
 it is common for people to create their *own* base class that extends from
-this one, and then all their test cases extend from it. Sounds like we are
-getting to [Inception](http://en.wikipedia.org/wiki/Inception) levels of
-class construction. 
+this one, and then all their test cases extend from it.
 
 All the built-in assertions that PHPUnit provides follow the same pattern:
 
@@ -117,6 +117,16 @@ For more details on all the assertions that are available to you, check
 the [latest documentation](http://www.phpunit.de/manual/3.7/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.assertions).
 
 ## Making Your Tests Tell You What's Failed
+
+### Verbose mode
+You can add the option `--verbose` when running PHPUnit to get some
+more detailed information about the test run. Things like skipped or
+incomplete tests are important to know, especially if you are using
+multiple different configuration files and are purposely skipping
+some tests due to either how long they take to run or their
+flakiness due to use of outside sources of information.
+ 
+### TestDox
 A friend of mine related a story to me about an experience he had in a
 team he was working with:
 
@@ -137,7 +147,7 @@ argument. You could use PHPUnit's [TestDox](http://www.phpunit.de/manual/3.7/en/
 functionality. What it does is turn the name of your test methods into easily-read
 strings. 
 
-It will turn the test method name "testBankBalanceCannotGoIntoOverdraftUnlessAllowed" into "Bank balance cannot
+It will turn the test method name `testBankBalanceCannotGoIntoOverdraftUnlessAllowed` into "Bank balance cannot
 go into overdraft unless allowed". But be careful: if you have tests that have
 the same name but you append an integer to the end, TestDox does not know
 that the two are different.
@@ -169,24 +179,16 @@ Here's a sample run using it.
      [x] Update correctly handles bad lie entity
      [x] Update correctly handles rejecting wrong lie update
 
-My advice: stick to using the optional message argument, but TestDox is a
-great option if your tests haven't been following my advice. At least you
-will know what test in particular is reporting failures.
+TestDox simply gives you a human-readable list of the tests that have
+run. PHPUnit will still tell you what tests failed, but the TestDox
+version just might make it easier.
 
 ## Configuring Run Time Options
-If you run '*phpunit --help*' from the command line, you will see a
+If you run `phpunit --help` from the command line, you will see a
 ridiculous number of options that are available to you. Some of them are
 useful, others seem to be in there because the author was looking for
 compatibility with existing tools. Here are the ones that I have found most
 useful.
-
-### Logging Options
-If you are using PHPUnit in conjunction with a continuous integration
-solution like [Jenkins-CI](http://www.jenkins-ci.org) then you should use 
-the *--log-junit optional/path/to/file* switch. 
-
-By spitting out logs in JUnit's XML format you make it easier for Jenkins plugins
-to grab that data and do something useful with it.
 
 ### Code Coverage Options
 Code coverage reports are a tool you can use to figure out how much
@@ -206,7 +208,7 @@ and [XDebug](http://xdebug.org) installed.
 There are two additional options you need to consider when generating code
 coverage:
 
-Use *--coverage-clover optional/path/to/file* for generating Clover-formatted
+Use `--coverage-clover optional/path/to/file` for generating Clover-formatted
 reports that can be read by Jenkins code coverage plugins.
 
 Clover-formatted reports can be used to examine trends over time in terms of
@@ -214,12 +216,16 @@ code coverage and lines of code added. These are extremely useful if you are try
 make sure developers are living up to their promises of writing tests with
 maximum code coverage.
 
-Use *--coverage-html optional/path* to create a series of HTML files that you
+Use `--coverage-html optional/path` to create a series of HTML files that you
 can view in your browser to see code coverage results.
 
+Code coverage reports are also a great tool for code reviews -- visible
+proof that you might be missing some tests for a few edge cases lurking
+deep inside your application.
+ 
 ### Managing Global State 
 Many PHP applications make use of singletons that have static method calls,
-or rely on globals and super-globals (such as $_SESSION or $_POST, etc). While there
+or rely on globals and super-globals (such as `$_SESSION` or `$_POST`, etc). While there
 are legitimate reasons from an architectural standpoint to use static
 methods, they are kryptonite when it comes to testing. Static classes, 
 attributes, and variables are also considered part of the global state.
@@ -240,10 +246,10 @@ to be dynamic.
 
 However, if you do need to use them, here are some tips:
 
-* *--no-globals-backup* will disable the default backup-and-restore $GLOBALS
-* *--static-backup* will backup and restore static attributes by default
-* *@backupGlobals* annotation can be used to temporarily disable the backup-and-restore functionality for globals
-* *@backupStaticAttributes* does the same, but for static attributes
+* `--no-globals-backup` will disable the default backup-and-restore $GLOBALS
+* `--static-backup` will backup and restore static attributes by default
+* `@backupGlobals` annotation can be used to temporarily disable the backup-and-restore functionality for globals
+* `@backupStaticAttributes` does the same, but for static attributes
 
 ### Process Isolation
 Sometimes you are testing functionality that needs to be isolated while
@@ -251,21 +257,23 @@ testing. Things like class autoloaders, the session super-global, and header
 output can all act weirdly under normal test conditions so they need a little help
 to create the proper environment.
 
-Use the *--process-isolation* switch to tell PHPUnit to run all your tests
+Use the `--process-isolation` switch to tell PHPUnit to run all your tests
 in their own PHP instance. This has the disadvantage of not being configurable
 for individual test cases, consuming more memory, and taking longer to
 execute.
 
 ## Test Environment Configuration
-It will quickly get tedious if you have to keep manually adding
-command-line switches when running your tests. By default, PHPUnit will look
-for a file called *phpunit.xml* whenever it runs and will then look at the
-values inside it.
-
-There are times when you will need different configuration files to run
-different kinds of tests, unit tests vs. integration is the most common scenario.
-You can have multiple configuration files, just make sure to call the one
-that you want to us.
+You'll find manually adding command-line switches when running your tests 
+quickly becomes tedious. Fortunately, PHPUnit allows you to use a           
+configuration file for specifying the default switches, among other         
+settings. By default, PHPUnit will look for a file named either             
+`phpunit.xml` or `phpunit.xml.dist` in the directory in which you run it,   
+and use the values it contains to alter its own behavior.                   
+                                                                            
+You may need different configuration for different kinds of tests -- e.g.,  
+unit tests vs. integration tests. PHPUnit allows you to indicate a specific 
+configuration file using the `--configuration` switch, with an argument     
+indicating the path of the configuration file.            
 
 To execute your tests with a specific configuration file do:
 
@@ -273,6 +281,11 @@ To execute your tests with a specific configuration file do:
     /path/to/phpunit --configuration /path/to/your/phpunit.xml
 
 ### Command-Line Switches 
+Command line switches can be specified in the configuration file as         
+attributes of the root `phpunit` element. The following provides            
+configuration for the `--backupGlobals` and `--processIsolation` switches,  
+respectively:    
+
 { lang: xml}
     <phpunit 
         backupGlobals="true"
@@ -280,7 +293,7 @@ To execute your tests with a specific configuration file do:
     <!-- other stuff goes here -->
     </phpunit>
 
-Appendix C of the current PHPUnit documentation covers this in more detail.
+[Appendix C](http://www.phpunit.de/manual/current/en/appendixes.configuration.html) of the current PHPUnit documentation covers this in more detail.
 I highly recommend setting as many of the command-line switches as you can
 in the configuration file so you don't forget to do it yourself. Remember,
 computers are awesome at doing what you tell them to over and over again.
@@ -298,51 +311,58 @@ want state leaking from one test to another. Things could get unpredictable
 if you modify an object in one test when a subsequent test expects that object
 to be unmodified.
 
-More commonly I have seen process isolation used in PHPUnit when
+I usually see process isolation used in PHPUnit when
 running integration tests. Why? Integration tests usually consist of
 manipulating real objects, not test doubles, so you must pay close
 attention to their state.
 
-To insist on process isolation for all your tests, it's as simple as passing
-*--process-isolation* as a CLI option, or setting *processIsolation="true"* in
+To ensure process isolation for all your tests, it's as simple as passing
+`--process-isolation` as a CLI option, or setting `processIsolation="true"` in
 your XML configuration file. This means, by default, every single test will
 be run in it's own PHP process. This means your test suite will take a
 lot longer to run, so keep this in mind if you decide to do it.
 
-If you only have some tests that need to be isolated, it's a little bit
-trickier. First, you need to add the annotation *@runInSeparateProcess*
-to the docblock for your test that needs isolation. However, be aware that once you've
-set that value, it will be preserved for all following tests.
+If you need process isolation for all tests in a single file, you can
+enforce this by putting `@runInSeparateProcess` in the docblock
+for your test class.
 
-To fix this, you would need to override the *run()* method in *PHPUnit_Framework_TestCase*
-to explicitly turn the preservation of global state back off. Here's
-an example.
+If you only have some tests that need to be isolated, make sure to use
+the annotation in the docblock for the method. That way, it is only applied
+to that one method.
 
-{lang : php }
-    <?php
-    class GrumpyIsolatedTests extends PHPUnit_Framework_TestCase
-    {
-        public function run(PHPUnit_Framework_TestResult $result = NULL)
-        {
-            $this->setPreserveGlobalState(true);
-
-            return parent::run($result);
-        }
-    }
-
-Given that you have to do this bit of hackery, I would recommend overriding
-the *run()* method in all your tests to explicitly set *preserveGlobalState*
-to false. Such is the price of having selected process isolation.
-
-Another potential solution is to use separate PHPUnit configuration
+Another potential solution is to use separate `phpunit.xml` 
 files that set process isolation as a run-time option and then
 white list only the directories containing the tests that need
 to be run in isolation. Conversely, make sure that your non-process-isolated
 configuration file doesn't include any tests that require isolation
 to work correctly.
 
-My experience has been that the dual configuration file method
-is the best way to go.
+As an example we have `phpunit-unit.xml`
+
+{ lang: xml}
+    <phpunit 
+        <!-- this is our config file for unit tests -->
+        processIsolation="false">
+    <!-- other stuff goes here -->
+    </phpunit>
+
+and we have `phpunit-integration.xml`
+
+{ lang: xml}
+    <phpunit 
+        <!-- this is our config file for integration tests -->
+        processIsolation="true">
+    <!-- other stuff goes here -->
+    </phpunit>
+
+Then, when you are ready to run just your unit tests you run
+
+{ lang: text} 
+    path/to/phpunit --configuration path/to/phpunit-unit.xml 
+
+My experience has been that the multiple configuration file method
+is the best way to go if you are going to write unit and integration
+tests.
 
 ## Organizing Your Tests
 
@@ -353,7 +373,7 @@ recursively traverse the directories below your root test directory to
 find tests to run.
 
 { lang: text}
-    Tests
+    tests
     |-- Foo
     |   | -- Fizz
     |   |    `-- InputsTest.php
@@ -362,9 +382,17 @@ find tests to run.
     |   `-- BazzTest.php
     `-- FooTest.php
 
-This is normally the way I organize my tests.
+This is normally the way I organize my tests. Like with so many things
+related to programming, this is a personal preference.
 
-### XML Configuration
+Some developers prefer to bundle their tests alongside the code (think
+vendor directories when installing things via Composer). Some prefer
+all their tests to be in one flat directory.
+
+Either way, it doesn't matter because PHPUnit will search all directories
+you ask it to looking for files with test cases in them.
+
+### Test Suites 
 In a previous section I talked about creating an XML test suite file. You
 can also specify exactly what tests you want run via XML. Let's create
 a file that mirrors the structure we used above.
@@ -381,10 +409,35 @@ a file that mirrors the structure we used above.
         </testsuites>
     </phpunit>
 
-If you are working as part of a team that uses some sort of agile
-development practice, I find the use of an XML file to be a good option. It
-allows you the flexibility to prevent tests being run that might depend on code
-fixes which have not yet been distributed to the rest of the team.
+Test suites are a way of grouping tests together. This can be handy
+if you are making changes to some code and want to first just run the
+tests most likely to be impacted by the change.
+
+To run the `Foo` test suite in the example file, you would do
+
+{ lang: text } 
+    /path/to/phpunit --testsuite Foo
+
+You can also use the test suite functionality to "whitelist" your tests,
+ensuring that only the ones you want get executed. This is handy if you
+are working on a large team and have tests for code that is not quite
+finished yet and therefore don't need to see those test failures.
+
+Want to group a test suite based on directory?
+
+{ lang: xml}
+    <phpunit>
+        <testsuites>
+            <testsuite named="Bar">
+                <directory>alpha</directory>
+                <directory>beta</directory>
+                <directory>gamma</directory>
+            </testsuite>
+        </testsuites>
+    </phpunit>
+
+PHPUnit does not require you to define test suites in the
+configuration file.
 
 ### Multiple Test Suites
 As you start writing a large number of tests for your application, you'll
@@ -406,24 +459,75 @@ of tests before a production push.
 So how do we do this? First, you'd define your test suites:
 
 { lang: xml}
-    <phpunit>
-        <!-- other options -->
+    <?xml version="1.0" encoding="UTF-8"?>
+    <phpunit
+        bootstrap="vendor/autoload.php"
+        printerFile="vendor/whatthejeff/nyancat-phpunit-resultprinter/src/NyanCat/PHPUnit/ResultPrinter.php"
+        printerClass="NyanCat\PHPunit\ResultPrinter">
         <testsuites>
-            <testsuite name="staging">
-                <directory>./standard</directory>
+            <testsuite name="unit">
+                <file>LieMapperTest.php</file>
+                <file>UserMapperTest.php</file>
             </testsuite>
-            <testsuite name="preprod">
-                <directory>./standard</directory>
-                <directory>./integration</directory>
-            </testSuite>
+            <testsuite name="integration">
+                <file>LieEntityTest.php</file>
+            </testsuite>
         </testsuites>
     </phpunit>
 
-Let's say you want to only run the "staging" test suite. You would tell
-PHPUnit via the CLI runner to do that like this:
+First, we run just the `unit` test suite
 
-{ lang: text}
-    /path/to/phpunit --testsuite staging
+{ lang: text }
+    $ phpunit --testsuite unit                                                                                                
+    PHPUnit 3.7.10 by Sebastian Bergmann.
+
+    Configuration read from /Users/chartjes/Sites/liesitoldmykids/tests/phpunit.xml
+
+     23  -_-_-_-_-_-_-_-_-_-_-_-__,------,
+     0   -_-_-_-_-_-_-_-_-_-_-_-__|  /\_/\ 
+     0   -_-_-_-_-_-_-_-_-_-_-_-_~|_( ^ .^) 
+         -_-_-_-_-_-_-_-_-_-_-_-_ ""  "" 
+
+
+    Time: 0 seconds, Memory: 4.25Mb
+
+    OK (23 tests, 74 assertions)
+
+Then the `integration` test suite
+
+{ lang: text }
+    $ phpunit --testsuite integration
+    PHPUnit 3.7.10 by Sebastian Bergmann.
+
+    Configuration read from /Users/chartjes/Sites/liesitoldmykids/tests/phpunit.xml
+
+     3   -_-__,------,
+     0   -_-__|  /\_/\ 
+     0   -_-_~|_( ^ .^) 
+         -_-_ ""  "" 
+
+
+    Time: 0 seconds, Memory: 3.75Mb
+
+    OK (3 tests, 6 assertions)
+
+Confident that our code is fine, let's run them both
+
+{ lang: text }
+    $ phpunit                        
+    PHPUnit 3.7.10 by Sebastian Bergmann.
+
+    Configuration read from /Users/chartjes/Sites/liesitoldmykids/tests/phpunit.xml
+
+     26  -_-_-_-_-_-_-_-_-_-_-_-_-_-_,------,
+     0   -_-_-_-_-_-_-_-_-_-_-_-_-_-_|   /\_/\ 
+     0   -_-_-_-_-_-_-_-_-_-_-_-_-_-^|__( ^ .^) 
+         -_-_-_-_-_-_-_-_-_-_-_-_-_-  ""  "" 
+
+
+    Time: 0 seconds, Memory: 4.50Mb
+
+    OK (26 tests, 80 assertions)
 
 ### Alternate Test Runners
 By default, PHPUnit's test runner is pretty bland. It doesn't
