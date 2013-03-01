@@ -7,3 +7,4 @@ dataproviders.markdown
 creating-test-data.markdown
 testing-apis.markdown
 testing-db.markdown
+testing-exceptions.markdown
