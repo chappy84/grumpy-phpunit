@@ -75,7 +75,7 @@ and recreate the database easily; automating these tasks is even better.
 
 Make sure that your application supports the ability to decide what
 database it will talk to. Set it in the bootstrap, or in your globally-available
-configuration object, or in the constructor of the God object every other object
+configuration object, or in the constructor of the base class every other object
 in your application extends itself from. I don't care, just make sure
 that you can tell your application what database to talk to.
 
@@ -130,9 +130,9 @@ to represent the data: Easier to mock, easier to test. But you are not me.
 If you want to use a database in your tests, I recommend the
 use of [DBUnit](https://github.com/sebastianbergmann/dbunit).
 
-Check the web site for installation details. At the time of writing the
-recommended method was via PEAR.
-
+Check the web site for installation details. As of this writing it can
+be installed via PEAR or Composer.
+ 
 There are times when you do need to talk to a database as part of a test,
 usually to verify that if you are saving some information to the database
 that it is still there. Let's look at a way we can create a test that
@@ -167,19 +167,19 @@ Using our sample app, here's one way to do it.
 These two methods we've implemented make sure that any calls to a database
 being accessed via PDO will be intercepted by DBUnit.
 
-In case you are wondering, if you omit the getDataSet() method DBUnit will
-not truncate your data in the database and replace it with the data in your
-fixture file. 
-
-Also, when creating your connection in the getConnection() method, make sure
+When creating your connection in the getConnection() method, make sure
 to use the same database credentials that your application is expecting.
 Otherwise DBUnit won't intercept calls to the database.
+
+In testing terms, the file that you put in the data you wish to be 
+loaded is called a fixture. When organizing my testing code I like
+to craete a directory called `fixtures` and put all of them in there.
 
 ### Using XML Datasets
 DBUnit supports several types of XML data fixtures. For my tests that
 do use them, I like to use "flat XML datasets".
 
-Here's an example:
+Here's an example XML file that I put into `fixtures/roster-seed.xml`
 
 {: lang="xml" }
    <?xml version="1.0" ?>
@@ -199,6 +199,7 @@ Then you load it like this:
         return $this->createFlatXMLDataset(
             dirname(__FILE__) . '/fixtures/roster-seed.xml');
     }
+
 
 If you prefer to be more of a purist, you could create a structured XML dataset.
 For our sample dataset, it would look like this:
@@ -292,9 +293,23 @@ The following example replaces "###NULL###" with a `null` value.
         return $rds;
     }
 
-There are also ways to merge in two different datasets, but we're getting
-to the point where I would just be cut-and-pasting the section of the
-PHPUnit manual into the book. Not really what I had in mind.
+You can merge data sets if you want to. Here's an example
+
+{: lang="php" }
+    <?php
+    public function getDataSet()
+    {
+        $mergedDs = PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
+        $fixturePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fixtures/rosters';
+ 
+    foreach ($fixtures as $fixture) {
+        $path =  $fixturePath . DIRECTORY_SEPARATOR . "$fixture.xml";
+        $ds = $this->createMySQLXMLDataSet($path);
+        $mergedDs->addDataSet($ds);
+    }
+
+    return $mergedDs;
+
 
 ### Using YAML datasets
 Don't like XML? You can always provide datasets in YAML:
@@ -364,23 +379,7 @@ You can load that dataset this way:
 
 ### Array-based datasets
 Sometimes you just want to hand out data as an array, and not mess around with
-any other file format:
-
-{: lang="php" }
-    <?php
-    public function getDataSet()
-    {
-        $dataset = array(
-            'rosters' => array(
-                array('id' => 1, 'tig_name' => 'Foo Bat', 'ibl_team' => 'MAD', 'comments' => 'Test Record', 'status' => 0, 'item_type' => 2),
-                array('id' => 2, 'tig_name' => 'TOR Bautista', 'ibl_team' => 'MAD', 'comments' => 'Joey bats!', 'status' => 1, 'item_type' => 1),
-                array('id' => 3, 'tig_name' => 'MAD#1', 'ibl_team' => 'MAD', 'comments' => 'Draft pick', 'status' => 0, 'item_type' => 0),
-                array('id' => 4, 'tig_name' => 'TOR Hartjes', 'ibl_team' => 'MAD', 'comments' => 'Test Writer', 'status' => 1, 'item_type' => 1)
-            )
-        );
-
-        return Grumpy_DBUnit_ArrayDataSet($dataset);
-    }
+any other file format.
 
 The only catch is that we have to implement our own dataset code...
 
@@ -435,6 +434,25 @@ The only catch is that we have to implement our own dataset code...
         }
     }
 
+Then you implement your `getDataSet()` method;
+
+{: lang="php" }
+    <?php
+    public function getDataSet()
+    {
+        $dataset = array(
+            'rosters' => array(
+                array('id' => 1, 'tig_name' => 'Foo Bat', 'ibl_team' => 'MAD', 'comments' => 'Test Record', 'status' => 0, 'item_type' => 2),
+                array('id' => 2, 'tig_name' => 'TOR Bautista', 'ibl_team' => 'MAD', 'comments' => 'Joey bats!', 'status' => 1, 'item_type' => 1),
+                array('id' => 3, 'tig_name' => 'MAD#1', 'ibl_team' => 'MAD', 'comments' => 'Draft pick', 'status' => 0, 'item_type' => 0),
+                array('id' => 4, 'tig_name' => 'TOR Hartjes', 'ibl_team' => 'MAD', 'comments' => 'Test Writer', 'status' => 1, 'item_type' => 1)
+            )
+        );
+
+        return Grumpy_DBUnit_ArrayDataSet($dataset);
+    }
+
+
 In my mind, the only advantage to going through the hassle of creating your
 own dataset object is that you end up with a dataset that handles missing
 values a lot easier.
@@ -457,6 +475,25 @@ table.
 
 {: lang="php" }
     <?php
+
+    public function getConnection()
+    {
+        $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=st@ts=Fun";
+        $pdo = new PDO($dsn);
+
+        return $this->createDefaultDBConnection($pdo, $dsn);
+    }
+
+    public function getDataSet()
+    {
+        // Load your dataset here
+    }
+
+    public function setup()
+    {
+        $this->db - $this->getConnection();
+    }
+
     public function testRemoveBatterFromRoster()
     {
         $testRoster = new Roster($this->db);
@@ -472,6 +509,10 @@ table.
                 'Did not delete roster item as expected'
         );
     }
+
+I think this example shows how powerful DBUnit can be: it provides the
+infrastructure so that you can test database-driven code as if
+they were simply units of code instead of waiting for integration tests.
 
 ## Mocking Database Connections
 So we have tests that are talking to the database directly and I have shown
@@ -504,7 +545,7 @@ First, create an example of what the database would give us back.
         ->will($this->returnValue($databaseResultSet));
 
 Next, create a mock object to represent the object that PDO would give us
-back when we run the *prepare()* method.
+back when we run the `prepare()` method.
 
 My use of stdClass is okay here for the purposes of this particular
 test. It doesn't really matter what type of object the mocked statement is

@@ -6,7 +6,7 @@ available on how to use testing tools.
 
 Turns out I was only partially right.
 
-While a good search using your search engine of choice can show you how to
+While using your search engine of choice can show you how to
 accomplish certain tasks, it was difficult to find one place that showed
 anything beyond extremely shallow solutions.
 
@@ -24,7 +24,7 @@ end-to-end. It's far more likely that you will end up using it a chapter
 at a time, learning the skills to give you a solid understanding of just
 one part of the testing process.
 
-As always, I welcome your feedback via Twitter (@grmpyprogrammer) or via
+As always, I welcome your feedback via Twitter and App.net (@grmpyprogrammer) or via
 email at chartjes@littlehart.net.
 
 
