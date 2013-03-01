@@ -63,7 +63,7 @@ that you can update PHPUnit independent of any other versions you already had
 installed.
 
 ### Installing via PEAR
-[Pear](http://pear.php.net) used to be my preferred method of installation
+[PEAR](http://pear.php.net) used to be my preferred method of installation
 before they made it available via Composer. In this case, installing things
 can be as simple as:
 
