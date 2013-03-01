@@ -1,9 +1,30 @@
 # Test Doubles
-A key part of doing any sort of unit testing is the ability to create fake
-versions of dependencies that are required to test code. They are referred
-to by many names, names that might often confuse people who are new to
-writing unit tests.
 
+## Why We Need Them
+When you are writing unit tests, you are writing tests to create
+scenarios where you control the inputs and want to verify that your
+code is returning expected results. 
+
+Code you write often depends on other code: things like
+database handles or values from a globally-available registry.
+In order to write tests for code using these dependencies, you need to be able
+to set those dependencies to specific states in order to 
+predict the expected result.
+
+One way to do this is through the use of [dependency injection](http://en.wikipedia.org/wiki/Dependency_injection).
+That Wikipedia article is long and technical, but the lesson to be learned
+is that you should be creating small modules of code that accept their
+dependencies one of three ways:
+
+* passing them in via an object's constructor method and assigning them to class attributes
+* by assigning dependencies to class attributes directly or by setters
+* by using a dependency injection container that is globally available
+
+Whatever method you choose (I prefer constructor injection), you can create
+objects in a known state through the use of test doubles created using
+PHPUnit's built-in mocking functionality.
+
+## What Are They
 In the pure testing world, there are three types of test doubles:
 
 * dummy objects
@@ -14,7 +35,7 @@ In the pure testing world, there are three types of test doubles:
 
 PHPUnit is not a purist in what it does. Dummy objects, stubs and mocks
 are available out of the box, and you can kind of, sort of, create spies
-using some of the methods provided by the mocking API.
+using some of the methods provided by the mocking API. No test fakes either.
 
 ## Dummy Objects
 {: lang="php" }
@@ -46,18 +67,11 @@ using some of the methods provided by the mocking API.
         }
     }
 
-The purpose of using test doubles is so that we can create versions of our
-dependencies to test specific scenarios. Sometimes we just need something
+Sometimes we just need something
 that can stand in for a dependency and we are not worrying about faking any
-functionality. For this we can just create a dummy object.
+functionality. For this we use a dummy object.
 
-Let's say we are creating a scenario where we are testing some code that
-accepts two objects via constructor injection, but we are only testing
-code that exercises one of those dependencies.
-
-Now, in order to test anything we need to pass in a Foo and Bar object.
-Also, because we are using type hinting in the constructor we need to make
-sure that we actually pass in objects of the correct type.
+Looking at the code above, in order to test anything we need to pass in a Foo and Bar object.
 
 {: lang="php" }
     <?php
@@ -65,8 +79,12 @@ sure that we actually pass in objects of the correct type.
     {
         $foo = $this->getMockBuilder('Foo')->getMock();
 
-        // Other code that mocks our Bar dependency...
-        // Not revealed because we cover it later...
+        $bar = $this->getMockBuilder('Bar')
+            ->setMethods(array('getStatus', 'merge'))
+            ->getMock();
+        $bar->expects($this->once())
+            ->method('getStatus')
+            ->willReturn($this->getValue('merge-ready'));
 
         // Create our Baz object and then test our functionality
         $baz = new Baz($foo, $bar);
@@ -80,14 +98,10 @@ sure that we actually pass in objects of the correct type.
         );
     }
 
-A totally contrived example to be sure, but why did we do the test this way?
-In our code under test we are specifically using type hinting, so the code
-is expecting to be given a dependency of a specific type.
-
-We don't need to completely mock out *$foo* because our test doesn't require
-a *Foo* object to do anything. Remember, the goal when writing tests is to
-also minimize the amount of testing code you need to write. Don't mock
-things if they don't need to be mocked!
+Our dummy object in this test is the `Foo` object we created. This test
+doesn't care if Foo does anything. Remember, the goal when writing tests
+is to also minimize the amount of testing code you need to write. Don't
+create test doubles for things if they aren't needed for the test!
 
 ## Test Stubs
 {: lang="php" }
@@ -107,18 +121,14 @@ things if they don't need to be mocked!
             $testResult,
             'Bar with pending status should not be merged'
         );
-	}
+    }
 
-Okay, so there isn't anything really exciting about using these tools to
-create an empty object. The next step is to create test stubs.
+A test stub is a mock object that you create (remember, a dummy object
+is really a mock object without any functionality) and then alter it
+so that when specific methods are called, we get a specific response back.
 
-A test stub is a dummy object that you create and then tell it that when
-specific methods of that object are called, we expect to get a specific
-response back.
-
-Next, we tell the mock what method we want it to run. In this case we are
-trying to stub out the functionality of *getStatus()* to replace whatever it
-really wants to do.
+In the test above, we are creating a test stub of `Bar` and controlling
+what a call to `getStatus` will do.
 
 A word of warning: PHPUnit cannot mock protected or private class methods.
 To do that you need to use PHP's Reflection API to create a copy of the
@@ -127,10 +137,10 @@ object you wish to test and set those methods to be publicly visible.
 I realize that from a code architecture point of view protected and
 private methods have their place. As a tester, they are a pain. 
 
-To end the stub method, we use *will()* to tell the stubbed method what we
+To end the stub method, we use `will` to tell the stubbed method what we
 want it to return. 
 
-In my experience, understanding how to stub methods in the dependencies
+Understanding how to stub methods in the dependencies
 of the code you are trying to test is the number one skill that good testers
 learn.
 
@@ -141,6 +151,9 @@ test stubs inside test stubs is an indication that you need to do some
 rethinking of your architecture. 
 
 ### Expectations during execution
+Here is an example of a test that sets expectations for what a particular
+method should return when called multiple times.
+
 {: lang="php" }
     <?php
     public function testShowingUsingAt()
@@ -160,14 +173,17 @@ rethinking of your architecture.
         $this->assertEquals(2, $foo->bar());
     }
 
-There are a number of values that we can use for *expects()*:
+There are a number of values that we can use for `expects()`:
 
-* *$this->at()* can be used to set expected return values based on how many times the method is running, starting at index 0
-* *$this->any()* won't care how many times you run it, and is the choice of lazy
-programmers everywhere
-* *$this->never()* expects the method to never run
-* *$this->once()* expects, well, I think you can figure that one out
-* *$this->atLeastOnce()* is an interesting one, a good alternative to any()
+* `$this->at()` can be used to set expected return values based on how many times the method is run. It accepts an integer as a parameter and starts at 0
+* `$this->any()` won't care how many times you run it, and is the choice of lazy testers everywhere
+* `$this->never()` expects the method to never run
+* `$this->once()` expects the method to be called only once during the test. If you are using `$this->with` that we talk about in the next section, PHPUnit will check that the method is called once with those specific parameters being passed in 
+* `$this->atLeastOnce()` is an interesting one, a good alternative to any()
+
+When you are creating expectations for multiple calls, be aware that 
+whatever response you are setting through the use of `this->with` is
+only applicable to that specific expectation.
 
 ### Returning Specific Values Based On Input
 {: lang="php" }
@@ -196,11 +212,15 @@ programmers everywhere
         $this->assertEquals($expectedResults, $testResults);
     }
 
-You can also write tests where you can mock an object that will return
-different results based on specific inputs, using the *with()* method.
-This is useful if you are testing some code that uses a dependency in a
-loop and wish to verify that a certain series of values are returned in
-a known order.
+Often, the
+methods you invoke on dependencies accept arguments, and will return
+different values depending on what was passed in. With PHPUnit, you can tell a mock object what to
+expect for arguments, and bind a specific return value for that input. To do
+this, you use the `with()` method to detail arguments, and the `returnValue()`
+method, inside the `will()` method, to detail return values.
+
+The test above shows you how to go about creating the expectation of a
+specific result based on a specific set of input parameters.
 
 ### Mocking method calls with multiple parameters
 If you need to mock a method that accepts multiple parameters, you can
@@ -249,7 +269,17 @@ Here is a very contrived example:
         }
     }
 
-To test it, we unleash the power of reflection.
+To create a test double that we can use, we need to follow these steps:
+
+* use the Reflection API to create a reflected copy of the object
+* call `setAccessible(true)` on the method in the reflected object you want to test
+* call `invoke()` on the reflected object, passing in the name of the method to test and any parameters you wish to pass in
+
+If you need to perform an assertion against the contents of a protected or
+private attribute, you can then use `assertAttribute` just like you would
+do any other assertion. [Chapter 4](http://www.phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.assertions) 
+of the PHPUnit documentation covers all the different types of assertions
+you can make.
 
 {: lang="php"}
     <?php
@@ -262,11 +292,10 @@ To test it, we unleash the power of reflection.
             $reflectedFoo = new ReflectionMethod($testFoo, 'bar');
             $reflectedFoo->setAccessible(true);
             $reflectedFoo->invoke($testFoo, 'production');
-            $message = PHPUnit_Framework_Assert::readAttribute(
-                $testFoo, 'message'
-            );
 
-            $this->assertEquals(
+            $this->assertAttributeEquals(
+                'production',
+                $reflectedFoo,
                 $expectedMessage,
                 $message,
                 'Did not get expected message'
@@ -274,7 +303,14 @@ To test it, we unleash the power of reflection.
         }
     }
 
+
 ## Test Spies
+The main difference between a test spy and a test stub is that you're not
+concerned with testing return values, only that a method you are testing
+has been called a certain number of times.
+
+Given the code below:
+
 {: lang="php" }
     <?php
     class Alpha
@@ -296,6 +332,12 @@ To test it, we unleash the power of reflection.
         // ...
     }
 
+If you wanted to create test spies to make sure a method is executed 3
+times, you could do something like this:
+
+{: lang="php" }
+    <?php
+
     // In your test class...
     public function betaProcessCalledExpectedTime()
     {
@@ -307,26 +349,31 @@ To test it, we unleash the power of reflection.
         $alpha->cromulate($deltas);
     }
 
-Often you will want to test that a certain method in your code has been run
-a specific number of times. You can do that using the *expects()* method as
-part of your mock object. 
 
 In this code, we want to make sure that, given a known number of 'deltas',
-*Beta::process()* gets called the correct number of times. In the above test example,
-the test case would fail if *Beta::process()* is not run 3 times. 
+`process()` gets called the correct number of times. In the above test example,
+the test case would fail if `process()` is not run 3 times. 
+
+As you saw in earlier tests in this chapter, `expects()` can accept a wide
+variety of options, but you can pass it an integer that matches the number of
+times you are expecting the method to be called in your test.
 
 ## More Object Testing Tricks
 
 ### Testing Traits
-If you are using PHP 5.4 and want to compose objects using traits,
-you have two options. You can test objects that use traits, and then
-test the functionality that the traits add.
+Because Traits can be defined once, but used many times, you will not want
+to necessarily test the functionality defined in traits in every object in
+which they are consumed. At the same time, you _do_ want to test the traits
+themselves. 
 
-If you are using PHPUnit 3.6 or newer, you can use a helper
-that will give you a test double that uses the trait:
+PHPUnit 3.6 and newer offers functionality for mocking traits
+via the `getObjectForTrait()` method; this will return an object composing
+the trait, so that you can unit test only the trait itself.
+
+Here's a sample trait:
 
 {: lang="php" }
-	<?php
+    <?php
     trait Registry
     {
         protected $values = array();
@@ -354,7 +401,7 @@ Okay, now we test it
     {
         public function testReturnsFalseForUnknownKey()
         {
-            $registry = $this->getObjectForTrait('Registry');
+           $registry = $this->getObjectForTrait('Registry');
             $response = $registry->get('foo');
             $this->assertFalse(
                 $response,
