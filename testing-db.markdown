@@ -138,7 +138,7 @@ usually to verify that if you are saving some information to the database
 that it is still there. Let's look at a way we can create a test that
 involves speaking to the database.
 
-### Setting things up for DBUnit
+### Setting Things Up For DBUnit
 Instead of extending from the usual PHPUnit test case object, we need to use
 a different one, and implement two required methods.
 
@@ -150,7 +150,7 @@ Using our sample app, here's one way to do it.
     {
         public function getConnection()
         {
-            $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=st@ts=Fun";
+            $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=*********";
             $pdo = new PDO($dsn);
 
             return $this->createDefaultDBConnection($pdo, $dsn);
@@ -275,7 +275,7 @@ As an example, the following dataset specifies null values as "###NULL###":
     </dataset>
 
 Once you've loaded the data set, you then need to iterate through it and
-swap out your token representing *null* for the real thing.
+swap out your token representing null for the real thing.
 
 In our test case's getDataSet() method, we use
 `PHPUnit_Extensions_Database_DataSet_ReplacementDataSet` to make substitutions.
@@ -311,7 +311,7 @@ You can merge data sets if you want to. Here's an example
     return $mergedDs;
 
 
-### Using YAML datasets
+### Using YAML Datasets
 Don't like XML? You can always provide datasets in YAML:
 
 {: lang="yaml" }
@@ -355,7 +355,7 @@ Then, to load that dataset:
             dirname(__FILE__) . '/fixtures/roster-seed.yml');
     }
 
-### Using CSV datasets
+### Using CSV Datasets
 CSV (comma-separated value) datasets are also possible:
 
 {: lang="csv" }
@@ -377,7 +377,7 @@ You can load that dataset this way:
         );
     }
 
-### Array-based datasets
+### Array-based Datasets
 Sometimes you just want to hand out data as an array, and not mess around with
 any other file format.
 
@@ -457,9 +457,9 @@ In my mind, the only advantage to going through the hassle of creating your
 own dataset object is that you end up with a dataset that handles missing
 values a lot easier.
 
-## Our first DBUnit test
+## Our First DBUnit Test
 How would we write a test for a method that removes a player from a roster?
-Inside Roster we could add this method:
+Inside `Roster` we could add this method:
 
 {: lang="php" }
     <?php
@@ -478,7 +478,7 @@ table.
 
     public function getConnection()
     {
-        $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=st@ts=Fun";
+        $dsn = "pgsql:host=127.0.0.1;dbname=ibl_stats;user=stats;password=*********";
         $pdo = new PDO($dsn);
 
         return $this->createDefaultDBConnection($pdo, $dsn);
@@ -520,17 +520,17 @@ you how to use fixtures to create known datasets. It's time to move up
 to the pure unit test level and make use of mock objects so that we don't
 have to actually talk to the database any more.
 
+First, create an example of what the database would give us back.
+
 {: lang="php" }
     <?php
-    public function returnExpectedRosterUsingMocks()
-    {
-        $databaseResultSet = array(
-            array('tig_name' => 'AAA Foo'),
-            array('tig_name' => 'BBB Bar'),
-            array('tig_name' => 'ZZZ Zazz'));
-    }
+    $databaseResultSet = array(
+        array('tig_name' => 'AAA Foo'),
+        array('tig_name' => 'BBB Bar'),
+        array('tig_name' => 'ZZZ Zazz'));
 
-First, create an example of what the database would give us back.
+Next, create the mock objects for the PDO object and statement we would be
+using.
 
 {: lang="php" }
     <?php
@@ -544,20 +544,6 @@ First, create an example of what the database would give us back.
         ->method('fetchAll')
         ->will($this->returnValue($databaseResultSet));
 
-Next, create a mock object to represent the object that PDO would give us
-back when we run the `prepare()` method.
-
-My use of stdClass is okay here for the purposes of this particular
-test. It doesn't really matter what type of object the mocked statement is
-because we are more interested in what is returned via those two methods.
-I've used this trick a few times when dealing with mocked objects that
-need to return other objects.
-
-You can create a MockPDO object by extending a PDO object and
-over-riding the constructor. I find it unnecessary for testing purposes.
-
-{: lang="php" }
-    <?php
     $db = $this->getMockBuilder('stdClass')
         ->setMethods(array('prepare'))
         ->getMock();
@@ -565,8 +551,35 @@ over-riding the constructor. I find it unnecessary for testing purposes.
         ->method('prepare')
         ->will($this->returnValue($statement));
 
-Finally, create another mocked object and tell it to return our mocked
-statement object.
+
+My use of stdClass is okay here for the purposes of this particular
+test. It doesn't really matter what type of object the mocked statement is
+because we are more interested in what is returned via those two methods.
+I've used this trick a few times when dealing with mocked objects that
+need to return other objects.
+
+You can create a mock `PDO` object by extending a `PDO` object and
+over-riding the constructor. This is necessary because `PDO` contains
+enough internal dependencies that it cannot be properly serialized, which in
+turn causes PHPUnit's mock building functions to throw a fatal error. 
+
+{: lang="php" }
+    <?php
+    class MockPDO extends PDO
+    {
+        public function __construct() {}
+    }
+
+    // Then inside your test...
+    $db = $this->getMockBuilder('MockPDO')
+        ->setMethods(array('prepare'))
+        ->getMock();
+    $db->expects($this->once())
+        ->method('prepare')
+        ->will($this->returnValue($statement));
+
+The rest of the test is the same, except we pass in our mocked PDO object
+instead of the one we created in the test's setUp() method.
 
 {: lang="php" } 
     <?php
@@ -578,10 +591,6 @@ statement object.
         $testRoster,
         "Did not get expected roster when passing in known team nickname"
     );
-}
-
-The rest of the test is the same, except we pass in our mocked PDO object
-instead of the one we created in the test's setUp() method.
 
 ## Mocking vs. Fixtures
 Having now seen the two approaches, when should you use mocks instead of

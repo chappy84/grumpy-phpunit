@@ -191,7 +191,7 @@ we expect.
            "limit": 10,
            "skip": 0
         }
-EOT;
+    EOT;
 
         $api = $this->getMockBuilder('\Grumpy\GimmebarApi')
             ->setMethods(array('grabPublicAssetsByUser'))

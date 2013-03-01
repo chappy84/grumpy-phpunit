@@ -131,7 +131,7 @@ In the test above, we are creating a test stub of `Bar` and controlling
 what a call to `getStatus` will do.
 
 A word of warning: PHPUnit cannot mock protected or private class methods.
-To do that you need to use PHP's Reflection API to create a copy of the
+To do that you need to use PHP's [Reflection API](http://php.net/manual/en/book.reflection.php) to create a copy of the
 object you wish to test and set those methods to be publicly visible.
 
 I realize that from a code architecture point of view protected and

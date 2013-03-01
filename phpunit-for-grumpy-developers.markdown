@@ -264,18 +264,18 @@ execute.
 
 ## Test Environment Configuration
 You'll find manually adding command-line switches when running your tests 
-quickly becomes tedious. Fortunately, PHPUnit allows you to use a           
-configuration file for specifying the default switches, among other         
-settings. By default, PHPUnit will look for a file named either             
-`phpunit.xml` or `phpunit.xml.dist` in the directory in which you run it,   
-and use the values it contains to alter its own behavior.                   
+quickly becomes tedious. Fortunately, PHPUnit allows you to use a
+configuration file for specifying the default switches, among other
+settings. By default, PHPUnit will look for a file named either
+`phpunit.xml` or `phpunit.xml.dist` in the directory in which you run it,
+and use the values it contains to alter its own behavior.
                                                                             
-You may need different configuration for different kinds of tests -- e.g.,  
-unit tests vs. integration tests. PHPUnit allows you to indicate a specific 
-configuration file using the `--configuration` switch, with an argument     
-indicating the path of the configuration file.            
+You may need different configuration for different kinds of tests -- e.g., 
+unit tests vs. integration tests. PHPUnit allows you to indicate a specific
+configuration file using the `--configuration` switch, with an argument 
+indicating the path of the configuration file.
 
-To execute your tests with a specific configuration file do:
+To execute your tests with a specific configuration file:
 
 {lang: text}
     /path/to/phpunit --configuration /path/to/your/phpunit.xml

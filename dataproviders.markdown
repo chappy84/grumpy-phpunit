@@ -1,6 +1,6 @@
 # Data Providers
 
-## Why you should use data providers
+## Why You Should Use Data Providers
 One of your main goals should always be to write the bare minimum amount of
 code in order to solve a particular problem you are facing. This is no different
 when it comes to tests, which are really nothing more than code.
@@ -27,7 +27,7 @@ that match the parameters that you are passing into your test.
 
 I know it sounds more complicated than it really is. Let's look at an example.
 
-## Look at all those tests
+## Look At All Those Tests
 If you didn't know about data providers, what might your FizzBuzz tests look like?
 
 {: lang="php" }
@@ -78,7 +78,7 @@ I'm sure you can see the pattern:
 * tests that are extremely similar in setup and execution
 * same assertion being used over and over
 
-## Creating data providers
+## Creating Data Providers
 A data provider is another method inside your test class that returns an
 array of results, with each result set being an array itself. Through
 some magic internal work, PHPUnit converts the returned result set into parameters
@@ -127,7 +127,7 @@ for every set of data being passed in by the provider. If the test fails
 it will indicate which index in the associative array was being used
 for that test run.
 
-## More complex examples
+## More Complex Examples
 Don't feel like you can only have really simple data providers. All you need
 to do is return an array of arrays, with each result set matching the
 parameters that your testing method is expecting. Here's a more complex example:
