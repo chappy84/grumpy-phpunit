@@ -67,8 +67,11 @@ exact time we run the test. What happens if you can't actually reach this
 API from your testing environment? This becomes important if you are
 rate-limited in your access.
 
-Also, consider the situation where you access the API through one URL for your
-development work but a different one for production. 
+Speaking directly to the API also reduces your ability to be 100% certain
+that the API will return what you expect. Make sure to do periodic checks
+that the API's you are using are still returning values you expect, or else
+you will end up with tests that do not reflect reality.
+
 
 ## Wrapping Your API Calls 
 I know this book is supposed to be about using PHPUnit, not about what your
