@@ -1,14 +1,4 @@
 # Data Providers
-{: lang="php" }
-    <?php
-
-    function dataProvider()
-    {
-        return array(
-            array(1, 'odd'),
-            array(2, 'even')
-        );
-    }
 
 ## Why you should use data providers
 One of your main goals should always be to write the bare minimum amount of
@@ -24,8 +14,21 @@ problem, if only because it is commonly presented as a problem to be solved
 as part of an interview. In my opinion it is a good problem to present
 because it touches on a lot of really elementary basics of programming.
 
+When you write tests for FizzBuzz, what you want to do is pass it a set
+of values and verify that they are FizzBuzzed correctly. This could 
+result in you having multiple tests that are the same except for the
+values you are testing with. Data providers give you a way to simplify
+that process.
+
+A data provider is a way to create multiple sets of testing data that
+can be passed in as parameters to your test method. You create a method
+that is available to the class your tests are in that returns an array of values
+that match the parameters that you are passing into your test.
+
+I know it sounds more complicated than it really is. Let's look at an example.
+
 ## Look at all those tests
-If you didn't know about data providers, what might your tests look like?
+If you didn't know about data providers, what might your FizzBuzz tests look like?
 
 {: lang="php" }
     <?php
@@ -119,6 +122,11 @@ heart's content via the data provider (even better). We have also learned the
 skill of applying some critical analysis to the testing code we are writing
 to make sure we are only writing the tests that we actually need.
 
+When using a data provider, PHPUnit will run the test method each time
+for every set of data being passed in by the provider. If the test fails
+it will indicate which index in the associative array was being used
+for that test run.
+
 ## More complex examples
 Don't feel like you can only have really simple data providers. All you need
 to do is return an array of arrays, with each result set matching the
@@ -141,3 +149,30 @@ parameters that your testing method is expecting. Here's a more complex example:
         return $response;
     }
 
+So don't think you need to limit yourself in what your data providers
+are allowed to do. The goal is to create useful data sets for testing
+purposes.
+
+## Data Provider Tricks
+Since data providers return associative arrays, you can assign them a more
+descriptive key to help with debugging. For example, we could refactor
+the data provider for our FizzBuzz test:
+
+{: lang="php" }
+    <?php
+    return array(
+        'one'      => array(1, '1'),
+        'fizz'     => array(3, 'Fizz'),
+        'buzz'     => array(5, 'Buzz'),
+        'fizzbuzz' => array(15, 'FizzBuzz')
+    );
+
+Also, data providers don't have to be methods inside the same class. You can use
+methods in other classes, you just have to make sure to define them as
+`public`. You can use namespaces as well. Here are two examples:
+
+* `@dataProvider Foo::dataProvider`
+* `@dataProvider Grumpy\Helpers\Foo::dataProvider`
+
+This allows you to create helper classes that are just data providers and cut down on
+the amount of duplicated code you have in your tests themselves.
