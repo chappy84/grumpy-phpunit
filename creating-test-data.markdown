@@ -33,7 +33,21 @@ this is that, during testing, I can create collections of objects
 by writing some PHP code and serializing the results to the
 file system for later retrieval.
 
-Here's an example:
+Let's say that we want to create a collection of Widgets. They are
+simple data objects.
+
+{ lang: php }
+    <?php
+    class Widget
+    {
+        public $sku;
+        public $description;
+        public $color;
+
+Because `Widget` has no hidden dependencies or dependencies on other
+resources it is a prime candidate to be serialized.
+
+Next, we can write a script to generate our serialized collection of objects.
 
 { lang: php }
     <?php
