@@ -1,4 +1,5 @@
 # Testing Databases 
+
 {: lang="php" }
     <?php
     namespace Grumpy;
@@ -182,7 +183,7 @@ do use them, I like to use "flat XML datasets".
 Here's an example XML file that I put into `fixtures/roster-seed.xml`
 
 {: lang="xml" }
-   <?xml version="1.0" ?>
+    <?xml version="1.0" ?>
     <dataset>
             <rosters id="1" tig_name="FOO Bat" ibl_team="MAD" comments="Test record" status="0" item_type="2" />
             <rosters id="2" tig_name="TOR Bautista" ibl_team="MAD" comments="Joey bats!" status="1" item_type="1" />

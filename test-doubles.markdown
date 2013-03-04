@@ -38,6 +38,7 @@ are available out of the box, and you can kind of, sort of, create spies
 using some of the methods provided by the mocking API. No test fakes either.
 
 ## Dummy Objects
+
 {: lang="php" }
     <?php
     class Baz
@@ -104,6 +105,7 @@ is to also minimize the amount of testing code you need to write. Don't
 create test doubles for things if they aren't needed for the test!
 
 ## Test Stubs
+
 {: lang="php" }
     <?php
     public function testMergeOfBarDidNotHappen()
@@ -186,6 +188,7 @@ whatever response you are setting through the use of `this->with` is
 only applicable to that specific expectation.
 
 ### Returning Specific Values Based On Input
+
 {: lang="php" }
     <?php
     public testChangingReturnValuesBasedOnInput()
