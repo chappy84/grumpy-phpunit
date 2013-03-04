@@ -1,4 +1,5 @@
 # Testing Exceptions
+
 {: lang="php" }
     <?php
     class Foo
