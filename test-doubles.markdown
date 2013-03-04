@@ -297,10 +297,9 @@ you can make.
             $reflectedFoo->invoke($testFoo, 'production');
 
             $this->assertAttributeEquals(
-                'production',
+                $expectedMessage, 
+                'message',
                 $reflectedFoo,
-                $expectedMessage,
-                $message,
                 'Did not get expected message'
             );
         }
