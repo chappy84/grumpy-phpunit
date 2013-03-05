@@ -38,7 +38,7 @@ code sample above.
     <?php
     /**
      * Test that makes sure we are correctly triggering an
-     * exception when we cannot conenct to our remote API
+     * exception when we cannot connect to our remote API
      *
      * @expectedException ApiException
      * @expectedExceptionMessage Cannot connect
@@ -113,7 +113,7 @@ test itself.
 {: lang="php"}
     /**
      * Test that makes sure we are correctly triggering an
-     * exception when we cannot conenct to our remote API
+     * exception when we cannot connect to our remote API
      */
     <?php
     public function testThrowsCorrectException()

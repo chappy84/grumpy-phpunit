@@ -168,13 +168,13 @@ Using our sample app, here's one way to do it.
 These two methods we've implemented make sure that any calls to a database
 being accessed via PDO will be intercepted by DBUnit.
 
-When creating your connection in the getConnection() method, make sure
+When creating your connection in the `getConnection()` method, make sure
 to use the same database credentials that your application is expecting.
 Otherwise DBUnit won't intercept calls to the database.
 
 In testing terms, the file that you put in the data you wish to be 
 loaded is called a fixture. When organizing my testing code I like
-to craete a directory called `fixtures` and put all of them in there.
+to create a directory called `fixtures` and put all of them in there.
 
 ### Using XML Datasets
 DBUnit supports several types of XML data fixtures. For my tests that
@@ -303,13 +303,14 @@ You can merge data sets if you want to. Here's an example
         $mergedDs = PHPUnit_Extensions_Database_DataSet_CompositeDataSet(array());
         $fixturePath = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fixtures/rosters';
  
-    foreach ($fixtures as $fixture) {
-        $path =  $fixturePath . DIRECTORY_SEPARATOR . "$fixture.xml";
-        $ds = $this->createMySQLXMLDataSet($path);
-        $mergedDs->addDataSet($ds);
-    }
+        foreach ($fixtures as $fixture) {
+            $path =  $fixturePath . DIRECTORY_SEPARATOR . "$fixture.xml";
+            $ds = $this->createMySQLXMLDataSet($path);
+            $mergedDs->addDataSet($ds);
+        }
 
-    return $mergedDs;
+        return $mergedDs;
+    }
 
 
 ### Using YAML Datasets
@@ -506,7 +507,7 @@ table.
 
         $this->assertEquals(
                 $expectedCount,
-                count($items),
+                count($rosterItems),
                 'Did not delete roster item as expected'
         );
     }
@@ -553,7 +554,7 @@ using.
         ->will($this->returnValue($statement));
 
 
-My use of stdClass is okay here for the purposes of this particular
+My use of `stdClass` is okay here for the purposes of this particular
 test. It doesn't really matter what type of object the mocked statement is
 because we are more interested in what is returned via those two methods.
 I've used this trick a few times when dealing with mocked objects that
@@ -580,7 +581,7 @@ turn causes PHPUnit's mock building functions to throw a fatal error.
         ->will($this->returnValue($statement));
 
 The rest of the test is the same, except we pass in our mocked PDO object
-instead of the one we created in the test's setUp() method.
+instead of the one we created in the test's `setUp()` method.
 
 {: lang="php" } 
     <?php

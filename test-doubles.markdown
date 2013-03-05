@@ -25,7 +25,7 @@ objects in a known state through the use of test doubles created using
 PHPUnit's built-in mocking functionality.
 
 ## What Are They
-In the pure testing world, there are three types of test doubles:
+In the pure testing world, there are five types of test doubles:
 
 * dummy objects
 * test stubs
@@ -100,7 +100,7 @@ Looking at the code above, in order to test anything we need to pass in a Foo an
     }
 
 Our dummy object in this test is the `Foo` object we created. This test
-doesn't care if Foo does anything. Remember, the goal when writing tests
+doesn't care if `Foo` does anything. Remember, the goal when writing tests
 is to also minimize the amount of testing code you need to write. Don't
 create test doubles for things if they aren't needed for the test!
 
@@ -227,7 +227,7 @@ specific result based on a specific set of input parameters.
 
 ### Mocking method calls with multiple parameters
 If you need to mock a method that accepts multiple parameters, you can
-specify that inside the with() method; specify the arguments in the same order
+specify that inside the `with()` method; specify the arguments in the same order
 the method accepts them:
 
 {: lang="php"}
@@ -326,7 +326,7 @@ Given the code below:
 
         public function cromulate($deltas)
         {
-            foreach ($this->deltas as $delta) {
+            foreach ($deltas as $delta) {
                 $this->beta->process($delta);
             }
         }
@@ -365,7 +365,7 @@ times you are expecting the method to be called in your test.
 ### Testing Traits
 Because Traits can be defined once, but used many times, you will not want
 to necessarily test the functionality defined in traits in every object in
-which they are consumed. At the same time, you _do_ want to test the traits
+which they are consumed. At the same time, you do want to test the traits
 themselves. 
 
 PHPUnit 3.6 and newer offers functionality for mocking traits
