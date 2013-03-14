@@ -181,6 +181,7 @@ There are a number of values that we can use for `expects()`:
 * `$this->any()` won't care how many times you run it, and is the choice of lazy testers everywhere
 * `$this->never()` expects the method to never run
 * `$this->once()` expects the method to be called only once during the test. If you are using `$this->with` that we talk about in the next section, PHPUnit will check that the method is called once with those specific parameters being passed in 
+* `$this->exactly()` expects the method to be called a specific number of items. It accepts an integer as the parameter
 * `$this->atLeastOnce()` is an interesting one, a good alternative to any()
 
 When you are creating expectations for multiple calls, be aware that 
@@ -290,11 +291,10 @@ you can make.
     {
         public function testProtectedBar()
         {
-            $testFoo = new Foo();
             $expectedMessage = 'PROTECTED BAR';
-            $reflectedFoo = new ReflectionMethod($testFoo, 'bar');
+            $reflectedFoo = new ReflectionMethod('Foo', 'bar');
             $reflectedFoo->setAccessible(true);
-            $reflectedFoo->invoke($testFoo, 'production');
+            $reflectedFoo->invoke(new Foo(), 'production');
 
             $this->assertAttributeEquals(
                 $expectedMessage, 
