@@ -85,7 +85,7 @@ Looking at the code above, in order to test anything we need to pass in a Foo an
             ->getMock();
         $bar->expects($this->once())
             ->method('getStatus')
-            ->willReturn($this->getValue('merge-ready'));
+            ->will($this->returnValue('merge-ready'));
 
         // Create our Baz object and then test our functionality
         $baz = new Baz($foo, $bar);
