@@ -251,17 +251,6 @@ However, if you do need to use them, here are some tips:
 * `@backupGlobals` annotation can be used to temporarily disable the backup-and-restore functionality for globals
 * `@backupStaticAttributes` does the same, but for static attributes
 
-### Process Isolation
-Sometimes you are testing functionality that needs to be isolated while
-testing. Things like class autoloaders, the session super-global, and header
-output can all act weirdly under normal test conditions so they need a little help
-to create the proper environment.
-
-Use the `--process-isolation` switch to tell PHPUnit to run all your tests
-in their own PHP instance. This has the disadvantage of not being configurable
-for individual test cases, consuming more memory, and taking longer to
-execute.
-
 ## Test Environment Configuration
 You'll find manually adding command-line switches when running your tests 
 quickly becomes tedious. Fortunately, PHPUnit allows you to use a
